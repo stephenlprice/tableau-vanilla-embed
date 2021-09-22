@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Datanous</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+      <link rel="shortcut icon" href="images\pugileFavicon16x16.jpg" type="image/x-icon" />
+	</head>
+
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Cockpit -->
+							<nav id="cockpitTop">
+								<section class="buttons">
+									<article>
+										<header class="underline">
+											<h2>Controls</h2>
+										</header>
+										<h4>Navigation</h4>
+        								<button class="button primary small" onclick="javascript:launchViz(-1);">Prev</button>
+        								<button class="button primary small" onclick="javascript:launchViz(1);">Next</button>
+        							</article>
+
+        							<article>
+    									<h4>Export Report</h4>
+        								<ul class="actions stacked">
+		        							<li><button id="cockpitbuttons" class="button primary small fit icon fa-file-pdf-o" onclick="exportToPDF();">PDF</button></li>
+		        							<li><button id="cockpitbuttons" class="button primary small fit icon fa-file-image-o" onclick="exportToImage();">Image</button></li>        
+		        						</ul>
+    								</article>
+
+        							<article>
+    									<h4>Export Data</h4>
+		        						<ul class="actions stacked">
+		        							<li><button id="cockpitbuttons" class="button primary small fit icon fa-file-excel-o" onclick="exportData();">Data</button></li>
+		        							<li><button id="cockpitbuttons" class="button primary small fit icon fa-columns" onclick="exportCrossTab();">XTab</button></li>
+		        						</ul>
+    								</article>
+
+    								<article>
+    									<h4>Share</h4>
+		        						<ul class="actions stacked">
+		        							<li><button id="cockpitbuttons" class="button primary small fit icon fa-share-alt" onclick="shareViz();">Viz</button></li>
+		        						</ul>
+    								</article>									
+								</section>
+
+								<section class="info">
+									<h4>Instructions</h4>
+									<div class="instructionsHorizontal">
+										<p>Navigate through the report using the previous and next buttons.
+										<br>To export data, first click on the sheet or visualization you desire to export and then select the desired format.
+	                                    <br>This report is meant for consumption on larger screens. As a result it may not display well on mobile devices.</p>
+	                                </div>		
+								</section>
+        					</nav>									
+						</div>
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

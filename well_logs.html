@@ -1,0 +1,255 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Datanous</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="shortcut icon" href="images\pugileFavicon16x16.jpg" type="image/x-icon" />
+		<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?lang=css&amp;skin=sons-of-obsidian&amp;autorun=true"></script>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="index.html" class="logo"><strong>Datanous</strong>: noēsis in a data world</a>
+									<ul class="icons">
+										<li><a href="https://www.linkedin.com/in/slprice" target="_blank" class="icon fa-linkedin-square"><span class="label">LinkedIn</span></a></li>
+										<li><a href="https://public.tableau.com/profile/stephen.price2086#!/" target="_blank" class="icon fa-area-chart"><span class="label">Tableau Public</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Content -->
+								<section>
+									<article class="clearfix">
+										<header class="main">
+											<h1>Tableau Well Logs</h1>
+											<p><span class="icon fa-tint"></span></span> <span class="icon fa-bar-chart"></span> consolidating .las files into a single source of truth for data visualization</p>
+										</header>
+
+										<span class="image main"><a href="https://www.tableau.com/products/prep" target="_blank"><img src="images/Log_Flow.png" alt="Well Logs Tableau Prep Flow"/></a></span>
+										
+										<!-- Best image size height = width/3 -->
+
+										<div class="box">
+											<p style="padding:10px">Working as a Product Consultant for Tableau I was brought in to assist an E&amp;P customer who had a particular set of requirements they needed to address with a BI solution. They were looking for a user-friendly data portal that supported a deeper self-service model and that was flexible enough from a visual standpoint to allow users to modify not only how data was displayed but also integrate the aesthetic of their content into a coherent company standard. Obviously we were a great fit for this project however the drilling department wanted to ensure that we had the ability to work with <strong><i>well logs</i></strong> and <strong><i>seismic data</i></strong>. We did not have any materials to share right away so I had to build a proof of concept for them. Before joining the Tableau team I worked for a drilling company for two and a half years. I also grew up hearing about the upstream business my entire life so needless to say I was absolutely thrilled by this challenge. My answer to the first request will be covered in this post. The latter request will be the subject of a future blog post - <i>so stay tuned!</i></p>
+										</div>
+
+										<hr class="major" />
+									</article>
+
+									<article class="clearfix">
+										<h2>Well Logs: what are they?</h2>
+										
+										<p><span class="image right"><a href="https://petrowiki.org/File:Vol5_Page_0380_Image_0001.png#filelinks" target="_blank"><img src="https://petrowiki.org/images/2/26/Vol5_Page_0380_Image_0001.png" alt="Types of Logs"></a></span>
+										To keep it simple well logs consist of data that is collected from a well in order to understand downhole geology or physical characteristics of the well itself. They are of critical importance for drilling departments everywhere and in fact <a href="https://en.wikipedia.org/wiki/Schlumberger" target="_blank">Schlumberger</a>, the largest oilfield services company in the world as of 2018 got its start by recording the first-ever electrical resistivity well log in Merkwiller-Pechelbronn, France in 1927.<br></br>However life is not simple. If you are interested in this subject I offer more background information in this section about how and why this data is collected. <br></br>The <a href="https://petrowiki.org/PetroWiki" target="_blank">PetroWiki</a> defines <a href="https://petrowiki.org/Types_of_logs" target="_blank">well logs</a> with sufficiently thorough explanations. For a quick glance you can refer to the image on the right. This image is sourced from the <i>Petroleum Engineering Handbook</i> (ISBN 978-1-55563-120-8). It organizes the different types of logs according to subsurface properties and logging tools. Basically you have different logs for open holes which are performed before casing has been run and logs that are performed on a cased hole (steel pipe casing has been run downhole) <a href="https://www.rigzone.com/training/insight.asp?insight_id=330&amp;c_id=1" target="_blank">see reference</a>. The middle ring describes the different properties that can be measured while the inner and outer rings indicate the logging tools that are used for that purpose. Some of these logs are evaluated in real-time to provide crucial operational data to drilling engineers as is the case with <a href="https://www.glossary.oilfield.slb.com/en/Terms/l/logging_while_drilling.aspx" target="_blank">LWD</a> (logging while drilling) and <a href="https://www.glossary.oilfield.slb.com/en/Terms/m/measurements-while-drilling.aspx" target="_blank">MWD</a> (measurements while drilling) logs. They may then be stored for future analysis as is the case of this post's example.</p> 
+
+										<p>So many potential use cases! You can click on the image to learn more about it or to zoom in.</p>
+									</article>
+
+									<article class="clearfix">
+										<p>The always useful and very concise <a href="https://www.glossary.oilfield.slb.com/" target="_blank">Schlumberger Oilfield Glossary</a> defines <a href="https://www.glossary.oilfield.slb.com/Terms/w/well_log.aspx" target="_blank">well logs</a> as follows:</p>
+
+										<p><span class="image right"><a href="https://www.slb.com/resources/oilfield_review/~/media/Files/resources/oilfield_review/ors11/spr11/defining_logging.ashx" target="_blank"><img src="images/Schlumberger_Well_Logs.png" alt="Schlumberger: Oilfield Review Spring 2011:23, no.1." /></a></span>
+										<blockquote cite="https://www.glossary.oilfield.slb.com/Terms/w/well_log.aspx"><strong>1. n. [Formation Evaluation]</strong><br></br>
+										The measurement versus depth or time, or both, of one or more physical quantities in or around a well. The term comes from the word "log" used in the sense of a record or a note. Wireline logs are taken downhole, transmitted through a wireline to surface and recorded there. Measurements-while-drilling (MWD) and logging while drilling (LWD) logs are also taken downhole. They are either transmitted to surface by mud pulses, or else recorded downhole and retrieved later when the instrument is brought to surface. Mud logs that describe samples of drilled cuttings are taken and recorded on surface.</blockquote></p>
+
+										<p>However it also has <u>this</u> to say:</p>
+
+										<blockquote cite="https://www.glossary.oilfield.slb.com/Terms/w/well_log.aspx"><strong>2. n. [Formation Evaluation]</strong><br></br>
+										The display of one or more log measurements on a <strong>strip of paper or film (a hard copy)</strong> with depth in one axis. In this sense, the term refers to the display not only of the measurement but of other relevant information. A typical log is presented on <strong>folded paper of indeterminate length</strong>, but about 8.5-in. [21.5-cm] wide. It consists of a heading, well sketch, logging tool sketch, insert, main log, repeat section and tail. When the term is used in this sense, each log measurement is usually referred to as a curve.</blockquote>
+
+										<p>Now as a Tableau guy this is just plain funny to me. I have seen logs before and back then I never thought twice about how this information was displayed, stored and used. I am sure the old fashioned way "just works" but honestly the line stating the required <i>"folded paper of indeterminate length"</i> just seems outdated. You mean that I can't slice and dice? I can't filter out any noise so I can focus on what is relevant to me? I can't easily compare different wells with each other without taking a field trip to the office printer? Next you're going to tell me what type of paper to use, the font size and typeface...I wouldn't be surprised.</p>
+
+										<p><strong>Note:</strong><i> I am fully aware that modern methods to display well logs do exist, however in many cases they still lack the flexibility that can be achieved with a proper BI technology. I will also use this funny definition as a narrative device so just move on to the next chapter.</i><p>
+									</article>
+
+									<hr class="major"/>
+
+									<article class="clearfix">
+										<p>Anyways visualizing well logs in Tableau seemed like an awesome challenge to me. This is how I did it:</p>
+
+										<h2>LAS Files <span class="image right"><a href="https://lasio.readthedocs.io/en/latest/exporting.html#multiple-files-las2excelbulk" target="_blank"><img src="images/lasfile.jpg" alt="sample .las file" /></a></span></h2>
+										<p>Now this may be exciting and all but there is tiny little problem in our way. Well logs are usually available as <a href="https://en.wikipedia.org/wiki/Log_ASCII_Standard" target="_blank">Log ASCII Standard File Formats</a> standardized by the <a href="http://www.cwls.org/las/" target="_blank">Canadian Well Logging Society</a> or otherwise known as <i>.las files</i>.</p>
+
+										<p>In other words you can't just drop them on Tableau Desktop right away to start exploring. First they need to be converted into a friendly format for analytics like a .csv file. Look at the image on the left for a sample .las file. A bunch of headers at the top. No columns or rows. Finally the actual curve data starts at line 43 after a note describing some sort of tool failure. Wouldn't it be nice to separate this information so one could analyze the curves and only bring in header metadata when necessary? It would also be nice to do this faster than a quick coffee break. No bigly, there are plenty of choices out there to get this done. Personally I feel most comfortable using <a href="https://www.python.org/" target="_blank">Python</a>. People working for companies that use well logs regularly should have access to software that easily exports these files to other formats.</p>
+
+										<p>I found a nifty package as I was searching the web for an open source solution to this problem: <a href="https://github.com/kinverarity1/lasio" target="_blank">lasio</a>. The package reads and writes .las files and is compatible with versions 1.2 and 2.0 of the standard. It provided for a very easy way to convert multiple files into something I could connect to. For this exercise I converted 165 .las files in less than 15 minutes using the <strong>las2excelbulk</strong> script. You can refer to the <a href="https://lasio.readthedocs.io/en/latest/exporting.html#multiple-files-las2excelbulk" target="_blank">package documentation</a> if you want to learn how to export these types of files.</p>
+									</article>
+
+									<br></br>
+
+									<article class="clearfix">
+										<p>This is basically how the script works:</p>
+
+										<pre><code class="prettyprint linenums">(py36) C:\Windows\System32>las2excelbulk --help
+
+positional arguments:
+  path
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -g GLOB, --glob GLOB  Match LAS files with this pattern (default: *.las)
+  -r, --recursive       Recurse through subfolders. (default: False)
+  -i, --ignore-header-errors
+                        Ignore header section errors. (default: False)</code></pre>
+
+										<p>If you want to export multiple .las files contained in a single folder (test_folder) to excel simply type this command:</p>
+
+										<pre><code class="prettyprint linenums">(py36) C:\Users\testuser\Documents\folder\>las2excelbulk --recursive test_folder</code></pre>
+
+										<hr class="major" />
+									</article>
+
+									<article class="clearfix">
+										<h2>Tableau Prep</h2>
+										<p>Now that I have successfuly exported my <i>.las files</i> into excel spreadsheets my next task is to do some data wrangling so that I consolidate them into a data model that will allow me to visualize these curves in my flexible analytics software of choice. I used <a href="https://www.tableau.com/products/prep" target="_blank">Tableau Prep</a> for this step as it is perfect for combining and shaping datasets such as this. I have used this product plenty of times and I truly enjoy it. Count me as a fan. Some of you may have noticed but the headline image for this post is the actual Tableau Prep Flow that I built for this project. Anyways here it goes again:</p>
+
+										<span class="image main"><a href="https://www.tableau.com/products/prep" target="_blank"><img src="images/Log_Flow.png" alt="Well Logs Tableau Prep Flow"/></a></span>
+
+										<p>Intentionally looking like a subway map, the idea is to start from the left and end at the right. All of the colored objects on the left are spreadsheets containing the log curves I had exported. The first step is to <strong>Union</strong> these files or combine them into a single dataset assuming a consistent structure such that for each new log it simple adds new rows and differentiates between wells using an auto-generated "table name" column. I then clean up this union to keep nice names for each well. Next I <strong>Pivot</strong> all of the curves so that there is a new column containing the values and another column declaring which mnemonic it corresponds to (the abbreviated type of log). This will be useful later so that I can combine these rows with the useful header metadata you had seen previously. After <strong>Cleaning</strong> and changing <strong>Data Types</strong> for the curve data I bring in the header file containing useful information about each curve. I then <strong>Join</strong> the two datasets using the curve mnemonic as the join clause. Before <strong>Publishing</strong> the final datasource to <a href="https://www.tableau.com/products/server" target="_blank">Tableau Server</a>, I perform some final cleaning to remove any unneeded fields.</p>
+
+										<span class="image main"><img src="images/well_log_extract.jpg" alt="Well Logs Tableau Extract"/></span>
+
+										<p>The above pictures my published datasource all hot and fresh, ready for analytics heaven!</p>
+
+										<hr class="major"/>
+									</article>
+
+									<article class="clearfix">
+										<h2>Tableau Desktop</h2>
+										<p>Ok so all of the above was a build up to this: being able to use consolidated well log data in <a href="https://www.tableau.com/products/desktop" target="_blank">Tableau Desktop</a>. From here onwards users should be able to access this data easily and use it to incorporate well logs into their dashboards, reports and to analyze curves at specific depths or across wells. It really opens up this valuable dataset to the rest of the organization and is way cooler than a <strong>folded paper of indeterminate length</strong>. Drilling Engineers and Geologists (who are highly technical btw) will no longer need to learn scripting skills for them to use this information in a modern analytics environment, just drag and drop baby!</p>
+
+										<p>Here are a few iterations:</p>
+
+										<span class="image main"><img src="images/well_log_well.png" alt="Well Logs in Tableau Desktop"/></span>
+
+										<p>Well Logs can complement a dashboard as in this example where well specific data is displayed on hover via a tooltip:</p>
+
+										<span class="image main"><img src="images/welllog_tooltip.png" alt="Well Logs Viz-in-Tooltip"/></span>
+
+										<p>Now certainly these iterations may break with convention but that's just a matter of building a dashboard to suit your needs, what is important here is taking this resource into a modern analytics platform that is accesible to the rest of the organization. It is also important to have fun.</p>
+
+										<p>This post has served its purpose as a general walkthrough for visualizing Well Logs in Tableau. In the future I plan to post an embedded visualization of a well log report for you to explore.</p>
+									</article>
+
+								</section>
+
+						</div>
+					</div>
+					
+				<!-- *****************Menu Bar******************* -->
+				<!-- Sidebar -->
+					<div id="sidebar" class="inactive">
+						<div class="inner">
+
+							<!-- Search -->
+								<section id="search" class="alt">
+									<form method="post" action="#">
+										<input type="text" name="query" id="query" placeholder="Search" />
+									</form>
+								</section>
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="index.html">Homepage</a></li>
+										<li><a href="datanous_about.html">Datanous?</a></li>
+										<li><a href="about_author.html">About the Author</a></li>
+										<li>
+											<span class="opener">Analytics</span>
+											<ul>
+												<li><a href="dataviz_gallery.html">Visual Analytics Gallery</a></li>
+												<li><a href="tableauJSAPI.html">Tableau's JavaScript API</a></li>
+											</ul>
+										</li>
+										<li>
+											<span class="opener">Backend Stuff</span>
+											<ul>
+												<li><a href="#">Coming Soon</a></li>
+											</ul>
+										</li>
+										<li>
+											<span class="opener">Oil &amp; Gas</span>
+											<ul>
+												<li><a href="well_logs.html">Tableau Well Logs</a></li>
+												<li><a href="#">Tableau Reflection Seismology</a></li>
+											</ul>
+										</li>
+									</ul>
+								</nav>
+
+							<!-- Section -->
+								<section>
+									<header class="major">
+										<h2>Featured Posts</h2>
+									</header>
+									<div class="mini-posts">
+										<article>
+											<a href="tableauJSAPI.html" class="image"><img src="images/Asset_Production_Report_1.jpg" alt="Tableau JavaScript API" /></a>
+											<p><strong>Tableau's JavaScript API</strong></br>Embed Tableau content on your website or application. Use JS functions to extend functionality. A great place to learn these skills from a no-nonsense author.</p>
+										</article>
+										<article>
+											<a href="well_logs.html" class="image"><img src="images/Well_Log_Flow.png" alt="Tableau Well Logs" /></a>
+											<p><strong>Tableau Well Logs</strong></br>Transform your .las files into a friendlier format. Use Tableau Prep to create a repository of all your logs and let visual magic happen in Tableau Desktop.</p>
+										</article>
+										<article>
+											<a href="dataviz_gallery.html" class="image"><img src="images/Call_Volume_Analysis_1.jpg" alt="Tableau JavaScript API" /></a>
+											<p><strong>Tableau Visual Gallery</strong></br>Tableau Public is a treasure trove of fantastic content. Given it's open nature and size sometimes a little guidance is needed. Here you will find a curated collection of my favorite data visualizations.</p>
+										</article>								
+									</div>
+									<ul class="actions">
+										<li><a href="#" class="button">More</a></li>
+									</ul>
+								</section>
+
+							<!-- Section -->
+								<section>
+									<header class="major">
+										<h2>Get in touch</h2>
+									</header>
+									<p>Reach out to me via email. Feedback is always welcome and I appreciate you visiting my site.</p>
+									<ul class="contact">
+										<li class="fa-envelope-o"><a href="mailto:datanous@protonmail.com">datanous@protonmail.com</a></li>
+										<li class="fa-linkedin-square"><a href="https://www.linkedin.com/in/slprice" target="_blank">LinkedIn</a></li>
+										<li class="fa-area-chart"><a href="https://public.tableau.com/profile/stephen.price2086#!/" target="_blank">Tableau Public</a></li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">DataNous</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://stephen.excessblam.com/datanous/" property="cc:attributionName" rel="cc:attributionURL">Stephen Price</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
+
+									<p class="copyright">Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a>.</p>
+								</footer>
+
+						</div>
+					</div>
+					<!-- *****************Menu Bar******************* -->
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

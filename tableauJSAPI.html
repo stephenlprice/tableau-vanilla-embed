@@ -1,0 +1,692 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Datanous</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+    <link rel="shortcut icon" href="images\pugileFavicon16x16.jpg" type="image/x-icon" />
+		<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?skin=sons-of-obsidian&amp;autorun=true"></script>
+		<script></script>
+		<script type="text/javascript">
+
+        window.addEventListener("load", mediaSizer);
+        //window.addEventListener("resize", mediaSizer);
+        // Listeners that will react when the page first loads or is resized.
+        // If any of these events take place the mediaSizer() function executes.
+				
+		var vizList = [
+					"https://public.tableau.com/views/Greenlight/GreenlightProfitDashboard",
+					"https://public.tableau.com/views/Greenlight/SummaryofProfitAnalysis",
+					"https://public.tableau.com/views/Greenlight/Categories",
+					"https://public.tableau.com/views/Greenlight/GreenlightProfitDashboardautomaticsizing",
+					"badurl"
+				];
+        // Array of Tableau Server URLs for dashboard or sheet navigation.
+    
+        var viz,
+            vizLen = vizList.length,
+            vizCount = 0,
+            devType;
+        var options = {
+        	device: devType,
+        };
+        // Declaration of variables.
+
+        function mediaSizer() {
+        // Determines the correct viz layout according to screen sizes.
+        	if (window.matchMedia("(max-width: 480px)").matches) {
+				//alert("I am a phone layout!");
+				devType = 'phone';
+				//options.device = 'phone';
+			} else if (window.matchMedia("(max-width: 980px)").matches) {
+				//alert("I am a tablet layout!");
+				devType = 'tablet';
+				//options.device = 'tablet';
+			} else {
+				//alert("I am a desktop layout!");
+				devType = 'desktop';
+				//options.device = 'desktop';
+			}
+
+			launchViz(vizCount);
+			// Launches the viz again with the new sizing at the current index of vizList.
+      }
+
+		function launchViz(vizNav) {
+		// JS object targeting a div in the html document. (vizNav) will pass navigation values to move back and forth across vizList.
+			var vizDiv = document.getElementById("vizContainer"),
+			// Will embed the visualization on a div with id="VizContainer"
+			options = {
+				device: devType,
+				hideTabs: true,
+	            hideToolbar: true,
+	            onFirstInteractive: function () {
+	            	listenToMarksSelection();
+	            }
+	        };
+	        // Option parameters that configure how the viz is displayed. Listeners are initialized once viz is interactive.
+	        // Device is set to devType which is determined by the mediaSizer() function.
+
+	        vizCount = vizCount + vizNav;
+	        // +/- 1 added to vizCount as set by navigation buttons via vizNav.
+
+	        if (vizCount >= vizLen) { 
+	            vizCount = 0;
+	        // If vizCount exceeds the length of the array then return to index 0 (displays the first viz).
+	        } else if (vizCount < 0) {
+	            vizCount = vizLen - 1;
+	        // If vizCount is below 0 then return array max index (displays the last viz).
+	        }
+	            
+	        if (viz) { 
+	            viz.dispose();
+	        // If a previous viz object exists, delete it.
+	        }
+
+	        var vizURL = vizList[vizCount];
+	        // Dynamic URL returning the string from vizList at index = vizCount (viz to be displayed).
+
+					try {
+						// Initializes the viz from the array with desired options. 
+						viz = new tableau.Viz(vizDiv, vizURL, options);
+	        	if (!viz) throw 'viz not initialized'
+					}
+					catch(err) {
+						alert(err);
+					}
+					finally {
+						console.log('whatever')
+						console.count('initViz')
+					}
+	        
+		}
+
+		// Respond to Events functions
+
+		function listenToMarksSelection() {
+        viz.addEventListener(tableau.TableauEventName.MARKS_SELECTION, onMarksSelection);
+    	}
+    	// Adds an event listener on the loaded viz and calls on the onMarksSelection function with selected marks.
+
+
+    	function onMarksSelection(marksEvent) {
+        return marksEvent.getMarksAsync().then(reportSelectedMarks);
+    	}
+    	// marksEvent raised by MARKS_SELECTION calls on method getMarksAsync() to get marks then calls on reportSelectedMarks function.
+
+
+    	function reportSelectedMarks(marks) {
+    	// Inserts mark and pair values into tabular format via inner html at appropriate div. One row = a distinct mark.
+        	var htmlHeaders = "";
+        	var htmlRows = "";
+        	// Different logic for table headers and rows to be inserted in a table via inner html.
+
+            for (var markIndex = 0; markIndex < marks.length; markIndex++) {
+                var pairs = marks[markIndex].getPairs();
+                // Loop through each selected mark and get data pairs (name and value).
+                
+                if (markIndex == 0){
+            	htmlHeaders += "<tr><th>Mark</th>";
+            	}
+            	// Mark header only needed once not multiple times.
+                
+                htmlRows += "<tr>" + "<td>" + markIndex + "</td>";
+                // Mark number used to define each row, so each mark is stored.
+                
+                for (var pairIndex = 0; pairIndex < pairs.length; pairIndex++) {
+                    var pair = pairs[pairIndex];
+                // Loop through each pair to store field name and value.
+
+                    if (markIndex == 0) {
+                    	htmlHeaders += "<th>" + pair.fieldName + "</th>";
+                    // Headers only needed once assuming a consistent structure across marks on the same sheet.
+                    }                    
+                    
+                    htmlRows += "<td>" + pair.formattedValue + "</td>";
+                    // Each value is stored within the corresponding mark/row and header.
+                }
+                
+                htmlHeaders += "</tr>";
+                htmlRows += "</tr>";
+                // Close the table row div once loop sequence is complete.
+            }
+
+            var infoDiv = document.getElementById('markHeaders');
+            infoDiv.innerHTML = htmlHeaders;
+            // Insert table header html into markHeaders div.
+
+            var infoDiv = document.getElementById('markValues');
+            infoDiv.innerHTML = htmlRows;
+            // Insert table row value html into markValues div.        
+    }	
+
+		// Cockpit buttons:
+
+		function exportToPDF() {
+			viz.showExportPDFDialog();
+		// Displays the native export to PDF dialog window. 
+		}
+
+		function exportToImage() {
+			viz.showExportImageDialog();
+		// Displays the native export image dialog window.
+		}
+
+		function exportData() {
+			viz.showExportDataDialog();
+		// Displays the native export data dialog window.
+		}
+
+		function exportCrossTab() {
+			viz.showExportCrossTabDialog();
+		// Displays the native export crosstab dialog window.
+		}
+
+		
+
+		function shareViz() {
+			// Displays the native share dialog window.
+			// viz.showShareDialog();
+			const publishedSheets = viz.getWorkbook().getPublishedSheetsInfo();
+			const activeSheet = viz.getWorkbook().getActiveSheet();
+			const activeSheetType = activeSheet.getSheetType();
+			let dataTables = [];
+			
+			if (activeSheetType === "worksheet") {
+				activeSheet.getDataSourcesAsync().then(
+					tables => {
+					dataTables.push(tables)
+					console.log('tables',tables)
+					console.log('tables[0]',tables[0])
+					console.log('tables[0] name', tables[0].getName())
+					}
+				)
+			}
+			else if (activeSheetType === "dashboard") {
+				const activeWorksheets = viz.getWorkbook().getActiveSheet().getWorksheets();
+				activeWorksheets.map((sheet, index) => {
+					sheet.getDataSourcesAsync().then(tables => {
+						dataTables.push(tables)
+						tables.forEach(table => console.log('table.getName()', table.getName()))
+					})
+				})
+			}
+			else if (activeSheetType === "story") {
+				const storyPointsInfo = activeSheet.getStoryPointsInfo();
+				console.log('storyPointsInfo', storyPointsInfo)
+				
+				storyPointsInfo.map((story, index) => {
+					console.log('story', story);
+				})
+			}
+		}
+
+		</script>
+
+	</head>
+	<body class="is-preload" onload="launchViz(0);">
+	<!--<body class="is-preload" onload="launchViz(0);"> -->
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="index.html" class="logo"><strong>Datanous</strong>: noēsis in a data world</a>
+									<ul class="icons">
+										<li><a href="https://www.linkedin.com/in/slprice" target="_blank" class="icon fa-linkedin-square"><span class="label">LinkedIn</span></a></li>
+										<li><a href="https://public.tableau.com/profile/stephen.price2086#!/" target="_blank" class="icon fa-area-chart"><span class="label">Tableau Public</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Tableau's JavaScript API</h1>
+										<p><span class="icon fa-bar-chart"></span>  A SHOWCASE OF JS API CLASSES AND METHODS</p>
+									</header>
+
+									<hr class="major" />
+
+									<article>
+										<h2>Touching is Allowed</h2>
+										<p>Go ahead and interact with the visualization. Move your phone around and test the layouts. Clicking or touching marks on a graph will perform actions across the dashboard. By selecting marks a nicely formatted HTML table will display at the bottom of the viz.</p>
+
+										<!-- Tableau Embedded Viz Frame -->
+									<article id="vizFrame" class="vizEmbed">							
+										
+										<!-- Tableau Embedded Viz -->
+										<div id="vizContainer" style="min-height:700px;"></div>
+
+										<!-- Navigations -->
+										<article id="navigation">
+											<h4>Navigation</h4>
+	        								<button class="button primary small" onclick="javascript:launchViz(-1);">Prev</button>
+	        								<button class="button primary small" onclick="javascript:launchViz(1);">Next</button>
+	        							</article>
+
+										<!-- Cockpit -->
+										<nav id="cockpitTop">
+											<section>
+												<h5>Export</h5>
+			        							<article class="exportButtons">			    							
+			        								<ul class="actions stacked">
+					        							<li><button id="cockpitbuttons" class="button primary small fit icon fa-file-pdf-o" onclick="exportToPDF();">PDF</button></li>
+					        							<li><button id="cockpitbuttons" class="button primary small fit icon fa-file-image-o" onclick="exportToImage();">Image</button></li>        
+					        						</ul>
+					        						<ul class="actions stacked">
+					        							<li><button id="cockpitbuttons" class="button primary small fit icon fa-file-excel-o" onclick="exportData();">Data</button></li>
+					        							<li><button id="cockpitbuttons" class="button primary small fit icon fa-columns" onclick="exportCrossTab();">XTab</button></li>
+					        						</ul>
+			    								</article>
+			    							</section>
+
+			    							<section>
+			    								<h5>Share</h5>
+			    								<article class="shareButtons">			    									
+					        						<ul class="actions stacked">
+					        							<li><button id="cockpitbuttons" class="button primary small fit icon fa-share-alt" onclick="shareViz();">Viz</button></li>
+					        						</ul>
+			    								</article>									
+											</section>
+			        					</nav>
+
+									</article>
+
+									<hr class="major" />
+
+									<!-- Mark Details -->						
+									<article>
+
+										<header class="underline"><h3>Selected Mark Details</h3></header>
+										<section class="info">
+											<div class="box">
+												<p><i>To display a table: touch or click the sheet or visualization and then select the desired marks.</i></p>
+			                                </div>		
+										</section>
+
+										</br>
+
+	        							<div class="markTable-wrapper">
+											<table class="alt">
+												<thead id="markHeaders">
+												</thead>
+												<tbody id="markValues">
+												</tbody>
+											</table>
+										</div>
+
+										<hr class="major" />
+
+										<h2>A Brief Introduction</h2>
+										<p>Lately everyone is talking about a thing called <strong>"Analytics Ubiquity"</strong>, referring to the delivery of analytics to consumers by embedding data visualizations into every day products and applications. Ok, not everyone is talking about this <i>(maybe not as often as you may hear about the Kardashians)</i>, but in my line of work it definitely is a term that comes up.</p>
+
+										<p>If you think about it for a bit, it makes a lot of sense. Here we are surfing this huge wave known as the digital revolution with vast amounts of valuable data being generated with each purchase, with every interaction and impression. Naturally it follows that organizations will seek to monetize this asset or provide an added value to their customers. For example people may want insight into their shopping patterns or they may want to quantify a return on marketing investments they have done with your platform. Maybe your company already provides data to its clients but the delivery seems outdated and static. You may lose control over this valuable commodity by distributing it via flat files. If that is the case surely you are already hearing complaints about how you need to modernize your business - the competition already does it!</p>
+
+										<p>There are plenty of use cases that can be very well served by embedding a data analytics platform like <a href="https://www.tableau.com/embedded-analytics" target="_blank">Tableau</a> into your existing applications. Not only will you leverage best in class visual analytics and governance but you can also use our <a href="https://onlinehelp.tableau.com/current/api/js_api/en-us/JavaScriptAPI/js_api.htm#" target="_blank">JavaScript</a> and <a href="https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api.htm" target="_blank">REST</a> APIs to seamlessly integrate Tableau into your product. Keep in mind that creating analytics content in Tableau is an enjoyable breeze compared to scripting and it is a skill that is much more straightforward to acquire. I hear developers say they prefer to author analytics content in Tableau due to the speed of iteration, flexibility and ease of use. When you embed Tableau into your application you will also be provided with a governed backend for data security that you do not need to build yourself, where it is easy for content creators to publish their work.</p> 
+
+										<p>The focus of this post is to present an embedded visualization that will demonstrate functions available in the JS API and also describe how to get started with your own embedded project. All of the data visualizations you see here were made in Tableau Desktop within a <strong>'mobile-first'</strong> design plan as most things on the internet these days should be.</p>
+
+										<hr class="major"/>
+									</article>
+
+										<h2>Walkthrough</h2>
+										<p>You may have noticed a nice control bar at the top of the visualization. It contains buttons for navigation, exporting of reports and datasets as well as for sharing. These buttons work by calling on Tableau <a href="https://onlinehelp.tableau.com/current/api/js_api/en-us/JavaScriptAPI/js_api_ref.htm" target="_blank">JavaScript API methods</a> and provide prebuilt dialog windows that are very convenient to deploy. In fact they are the same windows found in the native Tableau Server UI. Users can also select multiple marks on a sheet to display a nicely formatted table under <i>Selected Mark Details</i> which is enabled by adding an <i>Event Listener</i>. This set of functionalities is a great place to start learning about the JS API. Essentially what this page is doing is it combines several of the <a href="https://github.com/tableau/js-api-samples" target="_blank">JavaScript samples</a> available on GitHub and does so aesthetically. To help you get started with your own embedded project I will break down each of these methods and explain how they work in detail.</p>
+
+										<p><strong>Note:</strong><i> styling is not provided so the appearance of your document will be different.</i></p>
+
+										<br></br>
+
+										<h3>Initializing the API</h3>
+										<p>First of all you need to embed a visualization on your document. That means that you start by <a href="https://onlinehelp.tableau.com/current/api/js_api/en-us/JavaScriptAPI/js_api_concepts_get_API.htm" target="_blank">accessing</a> and <a href="https://onlinehelp.tableau.com/current/api/js_api/en-us/JavaScriptAPI/js_api_concepts_initializing.htm" target="_blank">initializing</a> the JavaScript API. The example you see on this page allows for navigation between different dashboards so it is a bit more complex than embedding a single viz. If you are interested in knowing how that works you can refer to the <a href="https://onlinehelp.tableau.com/current/api/js_api/en-us/JavaScriptAPI/js_api_sample_basic_embed.htm" target="_blank">Basic Embed</a> example. Anyways the methodology is the same. The difference is that in this case you will specify an array of URLs that target each dashboard and loop through them using the <i>next</i> and <i>previous</i> navigation buttons. I assume that you will get acquainted with the <i>accessing</i> and <i>initializing</i> links I provided above before looking at the explanations I have below.</p>
+
+										<p>In order to initialize a viz as seen on this page this is what the JavaScript looks like:</p>
+
+										<pre><code class="prettyprint linenums">&lt;script type="text/javascript" src="YOUR-SERVER/javascripts/api/tableau-2.min.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+
+var vizList = ["https://YOUR-SERVER/views/YOUR-VISUALIZATION1",
+               "https://YOUR-SERVER/views/YOUR-VISUALIZATION2",
+               "https://YOUR-SERVER/views/YOUR-VISUALIZATION3"];
+// Array of Tableau Server URLs for dashboard or sheet navigation.
+
+var viz,
+vizLen = vizList.length,
+vizCount = 0;
+// Declaration of variables.
+
+function launchViz(vizNav) {
+// JS object targeting a div in the html document. 
+// (vizNav) will pass navigation values to move back and forth across vizList using HTML buttons.
+	var vizDiv = document.getElementById("vizContainer"),
+	// Will embed the visualization on a div with id="vizContainer"
+	options = {
+		device: 'desktop',
+		hideTabs: true,
+		hideToolbar: true,
+		onFirstInteractive: function () {
+        	listenToMarksSelection();
+        }
+    };
+    // Option parameters that configure how the viz is displayed. Listeners are initialized once viz is interactive.
+
+    vizCount = vizCount + vizNav;
+    // +/- 1 added to vizCount as set by navigation buttons via vizNav.
+
+    if (vizCount >= vizLen) { 
+        vizCount = 0;
+    // If vizCount exceeds the length of the array then return to index 0 (displays the first viz).
+    } else if (vizCount &lt; 0) {
+        vizCount = vizLen - 1;
+    // If vizCount is below 0 then return array max index (displays the last viz).
+    }
+        
+    if (viz) { 
+        viz.dispose();
+    // If a previous viz object exists, delete it.
+    }
+
+    var vizURL = vizList[vizCount];
+    // Dynamic URL returning the string from vizList at index = vizCount (viz to be displayed).
+
+    viz = new tableau.Viz(vizDiv, vizURL, options);
+    // Initializes the viz from the array with desired options. 
+}
+&lt;/script&gt;</code></pre>
+
+										<p>The notes makes the <strong>launchViz();</strong> function pretty self explanatory but the jist of it is that you store an array of Tableau Server URLs in vizList and then use vizCount to navigate through vizLen. They will provide the correct parameters to the <strong>new tableau.Viz();</strong> object that will initialize the API and use vizDiv to target a div with id="vizContainer". Users will click on navigation buttons that will call on the function with launchViz(1); for next or launchViz(-1); for previous via vizNav, which will then change the vizCount that is used to obtain the index within the array. It is also necessary to include <strong>viz.dispose();</strong> so that an old viz can be removed and be replaced with a new vizualization as the user moves back and forth. If this is not added then you will get an exception.</p>
+
+										<p>The vizualization will be embedded on a div with <strong>id="vizContainer"</strong>. Also don't forget to run <strong>onload="launchViz(0);"</strong> at some point in your document to request the first viz in the array from the Tableau Server that is hosting it. The buttons will then call on the launchViz() function for navigation:</p>
+
+										<pre><code class="prettyprint linenums">&lt;body onload="launchViz(0);"&gt;
+	&lt;!-- Tableau Embedded Viz --&gt;
+	&lt;div id="vizContainer"&gt;&lt;/div&gt;
+
+	&lt;!-- Buttons --&gt;
+	&lt;button onclick="javascript:launchViz(-1);"&gt;Prev&lt;/button&gt;
+	&lt;button onclick="javascript:launchViz(1);"&gt;Next&lt;/button&gt;
+&lt;/body&gt;</code></pre>
+
+										<br></br>
+
+										<h3>Export and Share Methods</h3>
+										<p>The JS API <a href="https://onlinehelp.tableau.com/current/api/js_api/en-us/JavaScriptAPI/js_api_ref.htm" target="_blank">Reference</a> details the classes and methods that are available. Under the <strong>Viz Class</strong> you can find the methods used below. Honestly this is super simple. You create functions that prefix methods as in <strong>viz.method();</strong> to execute the functionality. In this case they will all display a native dialog window to perform actions. These examples can export the entire dashboard as a PDF file or as an image. They can also output the data rows belonging to the sheet the user has selected or generate a crosstab of that sheet for export. The last example displays a share window to obtain a URL or embed code that will reference this visualization.</p> 
+
+										<p>The JavaScript looks this way:</p>
+
+										<pre><code class="prettyprint linenums">function exportToPDF() {
+	viz.showExportPDFDialog();
+// Displays the native export to PDF dialog window. 
+}
+
+function exportToImage() {
+	viz.showExportImageDialog();
+// Displays the native export image dialog window.
+}
+
+function exportData() {
+	viz.showExportDataDialog();
+// Displays the native export data dialog window.
+}
+
+function exportCrossTab() {
+	viz.showExportCrossTabDialog();
+// Displays the native export crosstab dialog window.
+}
+
+function shareViz() {
+	viz.showShareDialog();
+// Displays the native share dialog window.
+}</code></pre>
+
+									
+										<p>The buttons will call on each function and look like this:</p>
+
+										<pre><code class="prettyprint linenums">&lt;body onload="launchViz(0);"&gt;
+	&lt;div id="vizContainer"&gt;&lt;/div&gt;
+
+	&lt;h4&gt;Export Report&lt;/h4&gt;
+	&lt;ul&gt;
+		&lt;li&gt;&lt;button onclick="exportToPDF();"&gt;PDF&lt;/button&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;button onclick="exportToImage();"&gt;Image&lt;/button&gt;&lt;/li&gt;        
+	&lt;/ul&gt;
+
+	&lt;h4&gt;Export Data&lt;/h4&gt;
+	&lt;ul&gt;
+		&lt;li&gt;&lt;button onclick="exportData();"&gt;Data&lt;/button&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;button onclick="exportCrossTab();"&gt;XTab&lt;/button&gt;&lt;/li&gt;
+	&lt;/ul&gt;
+
+	&lt;h4&gt;Share&lt;/h4&gt;
+	&lt;ul&gt;
+		&lt;li&gt;&lt;button onclick="shareViz();"&gt;Viz&lt;/button&gt;&lt;/li&gt;
+	&lt;/ul&gt;
+&lt;/body&gt;</code></pre>
+
+									<br></br>
+
+									<h3>Mark Selection</h3>
+									<p>This functionality allows users to interact with a visualization and in this particular example it will store marks that have been selected so that they can be displayed in a table. This is accomplished by using an <strong>event listener</strong> that will react to user selected data points or marks. Marks refer to individual visual elements displayed on a sheet. They can be many things such as bars on a bar graph, connected dots on a line graph or slices of a pie! I then display this data in an HTML table for a nice looking result. There are many use cases for event listeners to extend custom functionality to your content. I do want you to keep in mind that this functionality as displayed in this example is very easy to build in a Tableau visualization natively through crosstabs and filters, however the ability to do this in JavaScript can service a more specific need in your application. Maybe you want to format a table that will output JSON for example. In other words once you start embedding Tableau content into your application it is a good practice to know what is <i>easier to do in Tableau</i> itself before writing <i>unnecessary markup</i>. Personally I really liked this exercise so any ways here it goes.</p>
+
+									<h3>Event Listener</h3> 
+									<p>The first step to get this to work is to add an event listener grouped under <strong>Events</strong> in the very useful <strong>Viz Class</strong> described in the JS API <a href="https://onlinehelp.tableau.com/current/api/js_api/en-us/JavaScriptAPI/js_api_ref.htm" target="_blank">Reference</a>. This event requires a Tableau Event Name and a function that will occur once executed using this format <strong>addEventListener(type: TableauEventName, listener: Function)</strong>. Within <strong>Viz Event Classes</strong> you will find <strong>TableauEventName Enum</strong> that defines the strings used to specify the type of event. In this case I used a fully qualified enum of <strong>(marksselection)</strong> which is raised when marks are selected or unselected. Finally once marks are acted upon, the listener calls on the <strong>onMarksSelection();</strong> function to be described next.</p>
+
+									<pre><code class="prettyprint linenums">function listenToMarksSelection() {
+viz.addEventListener(tableau.TableauEventName.MARKS_SELECTION, onMarksSelection);
+}
+// Adds an event listener on the loaded viz and calls on the onMarksSelection function with selected marks.</code></pre>
+
+									<h3>Get Mark Data</h3> 
+									<p>Considering the previous function, the <strong>MARKS_SELECTION</strong> event passes an <strong>Event Class</strong> on callback called <strong>(marksEvent)</strong> identifying the marks. This executes the following function that will get the data associated with the selected marks. It does so by using the <strong>getMarksAsync()</strong> asynchronous method found under the <strong>MarksEvent Class</strong> that returns a <strong>Promise&lt;Mark[]&gt;</strong> or an array of marks. Finally the function will also execute the <strong>reportSelectedMarks()</strong> function.</p>
+
+									<pre><code class="prettyprint linenums">function onMarksSelection(marksEvent) {
+return marksEvent.getMarksAsync().then(reportSelectedMarks);
+}
+// marksEvent raised by MARKS_SELECTION calls on method getMarksAsync() to get marks then calls on reportSelectedMarks function.</code></pre>
+
+									<h3>Display the Table</h3>
+									<p>This is where my code deviates from the <a href="https://onlinehelp.tableau.com/current/api/js_api/en-us/JavaScriptAPI/js_api_sample_respond_to_events.htm" target="_blank">Respond to Events</a> sample. In the sample selected marks will be displayed as formatted text. I wanted to show them in a neat table so I modified the resulting inner HTML and the loops. Before explaining the JavaScript I want to start by showing how an <a href="https://www.w3schools.com/html/html_tables.asp" target="_blank">HTML table</a> is structured. The goal is to create a header row only once but then add new rows for each selected mark displaying the corresponding data values. Since marks will be selected from the same sheet they will have consistent fieldnames and values.</p>
+
+									<pre><code class="prettyprint linenums">&lt;table&gt;
+  &lt;tr&gt;
+    &lt;th&gt;Header a&lt;/th&gt;
+    &lt;th&gt;Header b&lt;/th&gt;
+    &lt;th&gt;Header c&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;Value a1&lt;/td&gt;
+    &lt;td&gt;Value b1&lt;/td&gt;
+    &lt;td&gt;Value c1&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;Value a2&lt;/td&gt;
+    &lt;td&gt;Value b2&lt;/td&gt;
+    &lt;td&gt;Value c2&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</code></pre>
+
+									<p>The <strong>reportSelectedMarks(marks)</strong> function works by having seperate variables for table headers and rows. It loops through the marks array and uses the <strong>getPairs()</strong> property from the <strong>Marks Class</strong> to obtain the field name and value pairs for each mark. Since I only need to display headers once I added conditions that will create HTML for only the first selected mark at index 0. Given that marks come from the same sheet I assume a consistent structure. It starts by creating a header called "Mark" and then writes the index of each mark as row values under that header. This identifies each individual mark.</p> 
+									<p>As it loops through the marks array the function loops through the corresponding pair values -i.e. each data point associated with that mark containing a fieldname and value, and stores them under the <strong>pairs</strong> variable. In a similar fashion it writes a single header entry from the first mark using <strong>pair.fieldName</strong> and then writes the corresponding rows of data using <strong>pair.formattedValue</strong>. The inner HTML that is generated contains the necessary tags to structure a table. Finally it inserts this HTML into the right header or data tags according to their declared id (markHeaders and markValues).</p>
+
+									<pre><code class="prettyprint linenums">function reportSelectedMarks(marks) {
+// Inserts mark and pair values into tabular format via inner html at appropriate div. One row = a distinct mark.
+	var htmlHeaders = "";
+	var htmlRows = "";
+	// Different logic for table headers and rows to be inserted in a table via inner html.
+
+    for (var markIndex = 0; markIndex &lt; marks.length; markIndex++) {
+        var pairs = marks[markIndex].getPairs();
+        // Loop through each selected mark and get data pairs (name and value).
+        
+        if (markIndex == 0){
+    	htmlHeaders += "&lt;tr&gt;&lt;th&gt;Mark&lt;/th&gt;";
+    	}
+    	// Mark header only needed once not multiple times.
+        
+        htmlRows += "&lt;tr&gt;" + "&lt;td&gt;" + markIndex + "&lt;/td&gt;";
+        // Mark number used to define each row, so each mark is stored.
+        
+        for (var pairIndex = 0; pairIndex &lt; pairs.length; pairIndex++) {
+            var pair = pairs[pairIndex];
+        // Loop through each pair to store field name and value.
+
+            if (markIndex == 0) {
+            	htmlHeaders += "&lt;th&gt;" + pair.fieldName + "&lt;/th&gt;";
+            // Headers only needed once assuming a consistent structure across marks on the same sheet.
+            }                    
+            
+            htmlRows += "&lt;td&gt;" + pair.formattedValue + "&lt;/td&gt;";
+            // Each value is stored within the corresponding mark/row and header.
+        }
+        
+        htmlHeaders += "&lt;/tr&gt;";
+        htmlRows += "&lt;/tr&gt;";
+        // Close the table row div once loop sequence is complete.
+    }
+
+    var infoDiv = document.getElementById('markHeaders');
+    infoDiv.innerHTML = htmlHeaders;
+    // Insert table header html into markHeaders div.
+
+    var infoDiv = document.getElementById('markValues');
+    infoDiv.innerHTML = htmlRows;
+    // Insert table row value html into markValues div.        
+}</code></pre>
+
+
+									<p>The HTML for the empty table is quite simple. It is empty except for the table header and body tags inside of which the appropriate HTML will be written according to their id when the user selects some marks. If no marks are selected then nothing is displayed.</p>
+
+									<pre><code class="prettyprint linenums">&lt;h3&gt;Selected Mark Details&lt;/h3&gt;		
+&lt;table&gt;
+	&lt;thead id="markHeaders"&gt;
+	&lt;/thead&gt;
+	&lt;tbody id="markValues"&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+
+									<hr class="major" />
+
+									<h3>Conclusion</h3>
+									<p>I hope this embedded example and walkthrough help you get started on your own project. You will find that the Tableau platform is a fantastic way to visualize and explore data. Meaning that not only will it help your team create content for your application but it will also provide the right tools to make sense out of this information, adding a tremendous value to the entire process. I provided useful links multiple times throughout this post and I suggest that you also check them out.</p>
+
+									<p>If you are interested in adding Tableau into your application or servicing analytics to your customers I suggest that you visit the <a href="https://www.tableau.com/embedded-analytics?utm_medium=homepage" target="_blank">Embedded Analytics</a> page and use the contact form to talk to someone that can help you get started.</p>
+
+									</article>
+
+								</section>
+						</div>
+					</div>
+					
+				<!-- *****************Menu Bar******************* -->
+				<!-- Sidebar -->
+					<div id="sidebar" class="inactive">
+						<div class="inner">
+
+							<!-- Search -->
+								<section id="search" class="alt">
+									<form method="post" action="#">
+										<input type="text" name="query" id="query" placeholder="Search" />
+									</form>
+								</section>
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="index.html">Homepage</a></li>
+										<li><a href="datanous_about.html">Datanous?</a></li>
+										<li><a href="about_author.html">About the Author</a></li>
+										<li>
+											<span class="opener">Analytics</span>
+											<ul>
+												<li><a href="dataviz_gallery.html">Visual Analytics Gallery</a></li>
+												<li><a href="tableauJSAPI.html">Tableau's JavaScript API</a></li>
+											</ul>
+										</li>
+										<li>
+											<span class="opener">Backend Stuff</span>
+											<ul>
+												<li><a href="#">Coming Soon</a></li>
+											</ul>
+										</li>
+										<li>
+											<span class="opener">Oil &amp; Gas</span>
+											<ul>
+												<li><a href="well_logs.html">Tableau Well Logs</a></li>
+												<li><a href="#">Tableau Reflection Seismology</a></li>
+											</ul>
+										</li>
+									</ul>
+								</nav>
+
+							<!-- Section -->
+								<section>
+									<header class="major">
+										<h2>Featured Posts</h2>
+									</header>
+									<div class="mini-posts">
+										<article>
+											<a href="tableauJSAPI.html" class="image"><img src="images/Asset_Production_Report_1.jpg" alt="Tableau JavaScript API" /></a>
+											<p><strong>Tableau's JavaScript API</strong></br>Embed Tableau content on your website or application. Use JS functions to extend functionality. A great place to learn these skills from a no-nonsense author.</p>
+										</article>
+										<article>
+											<a href="well_logs.html" class="image"><img src="images/Well_Log_Flow.png" alt="Tableau Well Logs" /></a>
+											<p><strong>Tableau Well Logs</strong></br>Transform your .las files into a friendlier format. Use Tableau Prep to create a repository of all your logs and let visual magic happen in Tableau Desktop.</p>
+										</article>
+										<article>
+											<a href="dataviz_gallery.html" class="image"><img src="images/Call_Volume_Analysis_1.jpg" alt="Tableau JavaScript API" /></a>
+											<p><strong>Tableau Visual Gallery</strong></br>Tableau Public is a treasure trove of fantastic content. Given it's open nature and size sometimes a little guidance is needed. Here you will find a curated collection of my favorite data visualizations.</p>
+										</article>								
+									</div>
+									<ul class="actions">
+										<li><a href="#" class="button">More</a></li>
+									</ul>
+								</section>
+
+							<!-- Section -->
+								<section>
+									<header class="major">
+										<h2>Get in touch</h2>
+									</header>
+									<p>Reach out to me via email. Feedback is always welcome and I appreciate you visiting my site.</p>
+									<ul class="contact">
+										<li class="fa-envelope-o"><a href="mailto:datanous@protonmail.com">datanous@protonmail.com</a></li>
+										<li class="fa-linkedin-square"><a href="https://www.linkedin.com/in/slprice" target="_blank">LinkedIn</a></li>
+										<li class="fa-area-chart"><a href="https://public.tableau.com/profile/stephen.price2086#!/" target="_blank">Tableau Public</a></li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">DataNous</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://stephen.excessblam.com/datanous/" property="cc:attributionName" rel="cc:attributionURL">Stephen Price</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
+
+                           <p class="copyright">Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a>.</p>
+								</footer>
+
+						</div>
+					</div>
+					<!-- *****************Menu Bar******************* -->
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
